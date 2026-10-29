@@ -1,0 +1,21 @@
+# Terraform: локальные данные не публикуются
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+tfplan
+*.tfplan
+crash.log
+crash.*.log
+.terraform.lock.hcl
+
+# Локальные параметры и ключи
+*.tfvars
+*.tfvars.json
+.env
+.ssh/
+
+# Редакторы и Windows
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
