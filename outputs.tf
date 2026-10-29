@@ -1,3 +1,4 @@
+
 output "web_public_ip" {
   description = "Публичный IP-адрес ВМ web"
   value       = yandex_compute_instance.web.network_interface[0].nat_ip_address

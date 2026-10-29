@@ -1,3 +1,4 @@
+
 data "yandex_compute_image" "ubuntu" {
   family = var.image_family
 }
@@ -34,7 +35,7 @@ resource "yandex_vpc_security_group" "web" {
 
   egress {
     protocol       = "ANY"
-    description    = "Исходящий трафик"
+    description    = "Исходящий трафик для установки Docker и nginx"
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -49,12 +50,6 @@ resource "yandex_vpc_security_group" "worker" {
     description    = "SSH из внутренней сети"
     v4_cidr_blocks = [var.subnet_cidr]
     port           = var.ssh_port
-  }
-
-  egress {
-    protocol       = "ANY"
-    description    = "Исходящий трафик"
-    v4_cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -86,8 +81,17 @@ resource "yandex_compute_instance" "web" {
   metadata = {
     "user-data" = <<-CLOUD_INIT
       #cloud-config
-      ssh_authorized_keys:
-        - ${var.ssh_public_key}
+      datasource:
+        Ec2:
+          strict_id: false
+      ssh_pwauth: no
+      users:
+        - name: ubuntu
+          groups: [sudo]
+          shell: /bin/bash
+          sudo: 'ALL=(ALL) NOPASSWD:ALL'
+          ssh_authorized_keys:
+            - ${var.ssh_public_key}
       package_update: true
       packages:
         - docker.io
@@ -128,9 +132,17 @@ resource "yandex_compute_instance" "worker" {
   metadata = {
     "user-data" = <<-CLOUD_INIT
       #cloud-config
-      ssh_authorized_keys:
-        - ${var.ssh_public_key}
-      package_update: true
+      datasource:
+        Ec2:
+          strict_id: false
+      ssh_pwauth: no
+      users:
+        - name: ubuntu
+          groups: [sudo]
+          shell: /bin/bash
+          sudo: 'ALL=(ALL) NOPASSWD:ALL'
+          ssh_authorized_keys:
+            - ${var.ssh_public_key}
       packages:
         - python3
       write_files:
